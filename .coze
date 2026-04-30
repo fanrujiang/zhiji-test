@@ -1,17 +1,23 @@
 [project]
-entrypoint = "server.js"
-requires = [ "nodejs-24" ]
-template = "taro"
-version = "0.0.18"
-appliedPatches = [ ]
+sub_id = "af56d5d9"
+name = "coze-mini-program"
+requires = ["nodejs-24"]
+project_type = "web"
+
+[preview]
+preview_enable = "enabled"
 
 [dev]
-build = [ "bash", ".cozeproj/scripts/dev_build.sh" ]
-run = [ "bash", ".cozeproj/scripts/dev_run.sh" ]
-deps = [ "git" ]
-pack = [ "bash", ".cozeproj/scripts/pack.sh" ]
+build = ["bash", ".cozeproj/scripts/dev_build.sh"]
+run = ["bash", ".cozeproj/scripts/dev_run.sh"]
 
 [deploy]
-build = [ "bash", ".cozeproj/scripts/deploy_build.sh" ]
-run = [ "bash", ".cozeproj/scripts/deploy_run.sh" ]
-deps = [ "git" ]
+build = ["bash", ".cozeproj/scripts/deploy_build.sh"]
+run = ["bash", ".cozeproj/scripts/deploy_run.sh"]
+
+[deploy.profile]
+kind = "service"
+flavor = "web"
+
+[subprojects]
+path = ["."]

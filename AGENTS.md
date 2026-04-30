@@ -512,3 +512,38 @@ useEffect(() => { setIsWeapp(Taro.getEnv() === Taro.ENV_TYPE.WEAPP) }, [])
   </View>
 )}
 ```
+
+## 项目初始化记录 (Coze 平台)
+
+### 基础信息
+- **项目名称**: coze-mini-program
+- **项目类型**: web (Taro H5 + NestJS 后端)
+- **工作区根目录**: `/workspace/projects`
+- **技术项目根目录**: `/workspace/projects`（与工作区根目录重合）
+- **运行时**: nodejs-24
+- **包管理器**: pnpm
+
+### .coze 配置
+- **sub_id**: `af56d5d9`
+- **preview_enable**: `enabled`
+- **preview 端口**: 5000 (H5 dev server + 后端服务)
+
+### 预览链路 (dev)
+- **dev.build**: `.cozeproj/scripts/dev_build.sh` - 安装依赖
+- **dev.run**: `.cozeproj/scripts/dev_run.sh` - 启动 `pnpm dev` (H5 前端 + NestJS 后端)
+
+### 部署链路 (deploy)
+- **deploy.build**: `.cozeproj/scripts/deploy_build.sh` - 构建前端 + 后端
+- **deploy.run**: `.cozeproj/scripts/deploy_run.sh` - 启动前端静态服务器 (5000) + 后端服务 (3000)
+- **deploy.profile.kind**: service
+- **deploy.profile.flavor**: web
+
+### 目录结构
+- H5 静态文件: `dist-web/`
+- 小程序代码: `dist/`
+- NestJS 后端: `server/dist/`
+
+### 端口映射
+- **预览端口**: 5000 (H5 前端)
+- **后端 API**: 3000 (NestJS)
+- Vite devServer 配置了 `/api` 代理到 `http://localhost:3000`

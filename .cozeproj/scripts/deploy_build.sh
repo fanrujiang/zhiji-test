@@ -1,19 +1,17 @@
-#!/bin/bash
-set -Eeuo pipefail
+#!/usr/bin/env bash
+set -euo pipefail
 
-cd "${COZE_WORKSPACE_PATH}"
-if [ -f "./.cozeproj/scripts/init_env.sh" ]; then
-    echo "⚙️ Initializing environment..."
-    # 使用 bash 执行，确保即使没有 x 权限也能跑
-    bash ./.cozeproj/scripts/init_env.sh
-else
-    echo "⚠️ Warning: init_env.sh not found, skipping environment init."
-fi
-echo "Installing dependencies..."
-# 安装所有依赖（包含 Taro 核心和 React）
-pnpm install
+# 基于脚本位置定位项目根目录
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+cd "$PROJECT_DIR"
 
-echo "Building the Taro project..."
-pnpm build
+# 1. 构建前端（H5）
+echo "Building H5 frontend..."
+pnpm build:web
 
-echo "Build completed successfully! Assets are in /dist"
+# 2. 构建后端（NestJS）
+echo "Building NestJS backend..."
+pnpm build:server
+
+echo "Build completed successfully!"
