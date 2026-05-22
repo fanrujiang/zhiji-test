@@ -1,8 +1,8 @@
 {
-  "name": "coze-mini-program",
+  "name": "zhiji-test",
   "version": "1.0.0",
   "private": true,
-  "description": "Coze Mini Program Application",
+  "description": "知己测 - 多端心理与命理测评应用",
   "scripts": {
     "install": "pnpm install",
     "build": "pnpm exec concurrently --kill-others-on-fail --kill-signal SIGKILL -n lint,tsc,web,weapp,tt,server -c red,blue,green,yellow,cyan,magenta \"pnpm lint:build\" \"pnpm tsc\" \"pnpm build:web\" \"pnpm build:weapp\" \"pnpm build:tt\" \"pnpm build:server\"",

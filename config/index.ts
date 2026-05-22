@@ -15,7 +15,7 @@ dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 const generateTTProjectConfig = (outputRoot: string) => {
   const config = {
     miniprogramRoot: './',
-    projectname: 'coze-mini-program',
+    projectname: 'zhiji-test',
     appid: process.env.TARO_APP_TT_APPID || '',
     setting: {
       urlCheck: false,
@@ -74,7 +74,7 @@ export default defineConfig<'vite'>(async (merge, _env) => {
   };
 
   const baseConfig: UserConfigExport<'vite'> = {
-    projectName: 'coze-mini-program',
+    projectName: 'zhiji-test',
     date: '2026-1-13',
     alias: {
       '@': path.resolve(__dirname, '..', 'src'),
@@ -104,7 +104,7 @@ export default defineConfig<'vite'>(async (merge, _env) => {
     ...(process.env.TARO_ENV === 'tt' && {
       tt: {
         appid: process.env.TARO_APP_TT_APPID,
-        projectName: 'coze-mini-program',
+        projectName: 'zhiji-test',
       },
     }),
     jsMinimizer: 'esbuild',
@@ -218,7 +218,7 @@ export default defineConfig<'vite'>(async (merge, _env) => {
       },
     },
     rn: {
-      appName: 'coze-mini-program',
+      appName: 'zhiji-test',
       postcss: {
         cssModules: {
           enable: false, // 默认为 false，如需使用 css modules 功能，则设为 true

@@ -423,7 +423,7 @@ const { avatar_url } = res.data; // 报错或 undefined
 - RecorderManager：H5 报错 → 检测平台 + useEffect 初始化 + H5 降级
 - 文件上传：H5 readFile 报错 → 用 `Network.uploadFile(tempFilePath)`
 - 后端文件读取：小程序 file.path / H5 file.buffer → 同时支持两种方式
-- H5 上传图片偶发裂开：Coze 平台 SW 拦截 blob fetch → H5 端取原始 File 对象手动构建 FormData 上传，绕过 Taro uploadFile
+- H5 上传图片偶发裂开：部分平台 Service Worker 可能拦截 blob fetch → H5 端取原始 File 对象手动构建 FormData 上传，绕过 Taro uploadFile
 
 ### 一、强制规范与代码模板
 
@@ -513,30 +513,12 @@ useEffect(() => { setIsWeapp(Taro.getEnv() === Taro.ENV_TYPE.WEAPP) }, [])
 )}
 ```
 
-## 项目初始化记录 (Coze 平台)
+## 项目初始化记录
 
 ### 基础信息
-- **项目名称**: coze-mini-program
+- **项目名称**: 知己测
 - **项目类型**: web (Taro H5 + NestJS 后端)
-- **工作区根目录**: `/workspace/projects`
-- **技术项目根目录**: `/workspace/projects`（与工作区根目录重合）
-- **运行时**: nodejs-24
 - **包管理器**: pnpm
-
-### .coze 配置
-- **sub_id**: `af56d5d9`
-- **preview_enable**: `enabled`
-- **preview 端口**: 5000 (H5 dev server + 后端服务)
-
-### 预览链路 (dev)
-- **dev.build**: `.cozeproj/scripts/dev_build.sh` - 安装依赖
-- **dev.run**: `.cozeproj/scripts/dev_run.sh` - 启动 `pnpm dev` (H5 前端 + NestJS 后端)
-
-### 部署链路 (deploy)
-- **deploy.build**: `.cozeproj/scripts/deploy_build.sh` - 构建前端 + 后端
-- **deploy.run**: `.cozeproj/scripts/deploy_run.sh` - 启动前端静态服务器 (5000) + 后端服务 (3000)
-- **deploy.profile.kind**: service
-- **deploy.profile.flavor**: web
 
 ### 目录结构
 - H5 静态文件: `dist-web/`
