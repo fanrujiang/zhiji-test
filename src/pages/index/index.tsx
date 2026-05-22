@@ -3,8 +3,15 @@ import Taro from '@tarojs/taro'
 import { View, Text, Image } from '@tarojs/components'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Brain, Star, Moon, Sun, BookOpen, Users, Sparkles, ChevronRight } from 'lucide-react-taro'
+import { Brain, Star, Moon, Sun, BookOpen, Users, Sparkles, ChevronRight, HeartHandshake } from 'lucide-react-taro'
 import { mbtiQuestions } from '../test/data'
+import { attachmentQuestions } from '../test/attachment-data'
+
+const startTest = (type: 'mbti' | 'attachment', total: number) => {
+  Taro.setStorageSync('active_test_type', type)
+  Taro.setStorageSync(`${type}_answers`, new Array(total).fill(-1))
+  Taro.navigateTo({ url: '/pages/test/index' })
+}
 
 // 功能入口数据
 const featureEntries = [
@@ -17,11 +24,18 @@ const featureEntries = [
     borderColor: 'border-indigo-200',
     textColor: 'text-indigo-600',
     priority: 'high',
-    action: () => {
-      const initialAnswers = new Array(mbtiQuestions.length).fill(-1)
-      Taro.setStorageSync('mbti_answers', initialAnswers)
-      Taro.navigateTo({ url: '/pages/test/index' })
-    }
+    action: () => startTest('mbti', mbtiQuestions.length)
+  },
+  {
+    id: 'attachment',
+    title: '依恋类型测试',
+    description: '40题看见你在亲密关系中的安全感与边界模式',
+    icon: <HeartHandshake size={24} color="#EC4899" />,
+    bgColor: 'bg-pink-50',
+    borderColor: 'border-pink-200',
+    textColor: 'text-pink-600',
+    priority: 'high',
+    action: () => startTest('attachment', attachmentQuestions.length)
   },
   {
     id: 'sbt',
@@ -179,9 +193,43 @@ export default function Index() {
           </Card>
         </View>
 
+        <View className="mb-4">
+          <Card className="border-pink-200 overflow-hidden">
+            <CardContent className="p-0">
+              <View className="bg-gradient-to-r from-rose-500 to-pink-500 p-6">
+                <View className="flex items-start justify-between">
+                  <View>
+                    <Text className="block text-white text-lg font-semibold mb-2">依恋类型测试</Text>
+                    <Text className="block text-rose-100 text-sm mb-4">
+                      从亲密焦虑与亲密回避两个维度理解关系模式
+                    </Text>
+                    <Button
+                      className="bg-white text-pink-600 hover:bg-pink-50 h-10 px-4"
+                      onClick={featureEntries[1].action}
+                    >
+                      开始测试
+                    </Button>
+                  </View>
+                  <View className="bg-white/20 rounded-full p-3">
+                    <HeartHandshake size={32} color="#FFFFFF" />
+                  </View>
+                </View>
+              </View>
+              <View className="p-4 bg-white">
+                <View className="flex items-center gap-2 text-xs text-slate-500">
+                  <Sparkles size={14} color="#EC4899" />
+                  <Text className="block">包含 40 道关系情境题</Text>
+                  <Text className="block">·</Text>
+                  <Text className="block">约需 6-8 分钟</Text>
+                </View>
+              </View>
+            </CardContent>
+          </Card>
+        </View>
+
         {/* 其他功能入口 */}
         <View className="grid grid-cols-2 gap-3">
-          {featureEntries.slice(1).map((feature) => (
+          {featureEntries.slice(2).map((feature) => (
             <Card 
               key={feature.id} 
               className={`${feature.borderColor} hover:shadow-md transition-shadow`}
@@ -244,11 +292,11 @@ export default function Index() {
               </View>
               <View>
                 <Text className="block text-base font-semibold text-slate-800 mb-2">
-                  什么是 MBTI 性格测试？
+                  什么是依恋类型测试？
                 </Text>
                 <Text className="block text-sm text-slate-600 leading-relaxed">
-                  MBTI（Myers-Briggs Type Indicator）是一种自我报告式的人格测评工具，
-                  用以衡量和描述人们在获取信息、作出决策、对待生活等方面的心理活动规律。
+                  依恋类型测试会观察你在亲密关系中的安全感、确认需求、独立边界和冲突反应，
+                  帮助你更清楚地理解自己如何靠近、如何保护自己。
                 </Text>
               </View>
             </View>
