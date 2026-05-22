@@ -3,6 +3,7 @@ import Taro from '@tarojs/taro'
 import { View, Text } from '@tarojs/components'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { NavBar } from '@/components/ui/navbar'
 import { Progress } from '@/components/ui/progress'
 import { ArrowLeft, ArrowRight, RefreshCcw } from 'lucide-react-taro'
 import { mbtiQuestions, calculateMBTI } from './data'
@@ -140,6 +141,7 @@ export default function Test() {
 
   return (
     <View className="min-h-screen bg-slate-50 flex flex-col">
+      <NavBar title={meta.title} showBack />
       <View className="bg-white px-4 pt-4 pb-3 shadow-sm">
         <View className="flex items-center justify-between mb-2">
           <View>
@@ -198,9 +200,11 @@ export default function Test() {
                     >
                       <View className="flex items-center justify-between">
                         <Text className="block text-base text-slate-800">{label}</Text>
-                        <Text className={`block text-sm font-semibold ${
-                          answers[currentIndex] === index ? selectedAccent.text : 'text-slate-400'
-                        }`}>
+                        <Text
+                          className={`block text-sm font-semibold ${
+                            answers[currentIndex] === index ? selectedAccent.text : 'text-slate-400'
+                          }`}
+                        >
                           {index + 1}
                         </Text>
                       </View>

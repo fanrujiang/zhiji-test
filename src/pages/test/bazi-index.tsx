@@ -1,13 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Taro from '@tarojs/taro'
 import { View, Text } from '@tarojs/components'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { NavBar } from '@/components/ui/navbar'
 import { Input } from '@/components/ui/input'
-import { Calendar } from '@/components/ui/calendar'
-import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react-taro'
-import { calculateBazi, BaziResult, getZodiac, getNaYin, dayMasterStrength } from './bazi-data'
+import { CalendarDays, Clock, Sparkles, UserRound } from 'lucide-react-taro'
+import { calculateBazi } from './bazi-data'
 
 export default function BaziTest() {
   const [year, setYear] = useState('')
@@ -15,9 +14,6 @@ export default function BaziTest() {
   const [day, setDay] = useState('')
   const [hour, setHour] = useState('')
   const [gender, setGender] = useState<'男' | '女'>('男')
-  const [showCalendar, setShowCalendar] = useState(false)
-  const [calendarMode, setCalendarMode] = useState<'year' | 'month' | 'day'>('year')
-
   const isComplete = year && month && day && hour
 
   const handleCalculate = () => {
@@ -66,42 +62,14 @@ export default function BaziTest() {
       return
     }
 
-    // 计算八字
     const bazi = calculateBazi(yearNum, monthNum, dayNum, hourNum)
-    
-    // 保存结果
+
     Taro.setStorageSync('bazi_result', bazi)
     Taro.setStorageSync('bazi_gender', gender)
     Taro.setStorageSync('bazi_birth', { year: yearNum, month: monthNum, day: dayNum, hour: hourNum })
-    
-    // 跳转到结果页
+    Taro.setStorageSync('active_test_type', 'bazi')
+
     Taro.navigateTo({ url: '/pages/result/index?type=bazi' })
-  }
-
-  const handleSelectYear = () => {
-    setCalendarMode('year')
-    setShowCalendar(true)
-  }
-
-  const handleSelectMonth = () => {
-    setCalendarMode('month')
-    setShowCalendar(true)
-  }
-
-  const handleSelectDay = () => {
-    setCalendarMode('day')
-    setShowCalendar(true)
-  }
-
-  const handleCalendarConfirm = (date: Date) => {
-    if (calendarMode === 'year') {
-      setYear(date.getFullYear().toString())
-    } else if (calendarMode === 'month') {
-      setMonth((date.getMonth() + 1).toString())
-    } else {
-      setDay(date.getDate().toString())
-    }
-    setShowCalendar(false)
   }
 
   // 时辰选项
@@ -124,7 +92,7 @@ export default function BaziTest() {
     <View className="min-h-screen bg-gradient-to-b from-amber-50 via-white to-white">
       <NavBar title="八字命盘" showBack />
       
-      <View className="pt-16 pb-20">
+      <View className="pb-28">
         {/* 头部 */}
         <View className="px-4 pt-6 pb-4 text-center">
           <View className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 mb-3">
@@ -134,13 +102,27 @@ export default function BaziTest() {
           <Text className="block text-sm text-slate-500">根据您的出生时间计算八字命盘</Text>
         </View>
 
+        <View className="px-4 mb-4">
+          <Card className="border-amber-200 bg-amber-50">
+            <CardContent className="p-4">
+              <Text className="block text-sm font-medium text-amber-800 mb-1">填写说明</Text>
+              <Text className="block text-xs text-amber-700 leading-relaxed">
+                请使用公历出生日期。时辰按 24 小时填写，23 点会按子时计算。
+              </Text>
+            </CardContent>
+          </Card>
+        </View>
+
         {/* 输入表单 */}
         <View className="px-4">
           <Card className="shadow-md border-0">
             <CardContent className="p-6">
               {/* 性别选择 */}
               <View className="mb-6">
-                <Text className="block text-sm font-medium text-slate-700 mb-3">您的性别</Text>
+                <View className="flex items-center gap-2 mb-3">
+                  <UserRound size={16} color="#D97706" />
+                  <Text className="block text-sm font-medium text-slate-700">您的性别</Text>
+                </View>
                 <View className="flex gap-3">
                   <View 
                     className={`flex-1 py-3 rounded-xl border-2 text-center transition-all ${
@@ -150,9 +132,13 @@ export default function BaziTest() {
                     }`}
                     onClick={() => setGender('男')}
                   >
-                    <Text className={`block text-base font-medium ${
-                      gender === '男' ? 'text-amber-600' : 'text-slate-500'
-                    }`}>♂ 男</Text>
+                    <Text
+                      className={`block text-base font-medium ${
+                        gender === '男' ? 'text-amber-600' : 'text-slate-500'
+                      }`}
+                    >
+                      ♂ 男
+                    </Text>
                   </View>
                   <View 
                     className={`flex-1 py-3 rounded-xl border-2 text-center transition-all ${
@@ -162,22 +148,29 @@ export default function BaziTest() {
                     }`}
                     onClick={() => setGender('女')}
                   >
-                    <Text className={`block text-base font-medium ${
-                      gender === '女' ? 'text-amber-600' : 'text-slate-500'
-                    }`}>♀ 女</Text>
+                    <Text
+                      className={`block text-base font-medium ${
+                        gender === '女' ? 'text-amber-600' : 'text-slate-500'
+                      }`}
+                    >
+                      ♀ 女
+                    </Text>
                   </View>
                 </View>
               </View>
 
               {/* 年份 */}
               <View className="mb-4">
-                <Text className="block text-sm font-medium text-slate-700 mb-2">出生年份</Text>
-                <View className="bg-slate-50 rounded-xl px-4 py-3">
+                <View className="flex items-center gap-2 mb-2">
+                  <CalendarDays size={16} color="#D97706" />
+                  <Text className="block text-sm font-medium text-slate-700">出生年份</Text>
+                </View>
+                <View>
                   <Input 
                     type="number"
                     placeholder="请输入4位年份，如1990"
                     value={year}
-                    onChange={(e) => setYear(e.detail.value)}
+                    onInput={(e) => setYear(e.detail.value)}
                   />
                 </View>
               </View>
@@ -185,12 +178,12 @@ export default function BaziTest() {
               {/* 月份 */}
               <View className="mb-4">
                 <Text className="block text-sm font-medium text-slate-700 mb-2">出生月份</Text>
-                <View className="bg-slate-50 rounded-xl px-4 py-3">
+                <View>
                   <Input 
                     type="number"
                     placeholder="请输入1-12"
                     value={month}
-                    onChange={(e) => setMonth(e.detail.value)}
+                    onInput={(e) => setMonth(e.detail.value)}
                   />
                 </View>
               </View>
@@ -198,26 +191,29 @@ export default function BaziTest() {
               {/* 日期 */}
               <View className="mb-4">
                 <Text className="block text-sm font-medium text-slate-700 mb-2">出生日期</Text>
-                <View className="bg-slate-50 rounded-xl px-4 py-3">
+                <View>
                   <Input 
                     type="number"
                     placeholder="请输入1-31"
                     value={day}
-                    onChange={(e) => setDay(e.detail.value)}
+                    onInput={(e) => setDay(e.detail.value)}
                   />
                 </View>
               </View>
 
               {/* 时辰 */}
               <View className="mb-4">
-                <Text className="block text-sm font-medium text-slate-700 mb-2">出生时辰（小时）</Text>
+                <View className="flex items-center gap-2 mb-2">
+                  <Clock size={16} color="#D97706" />
+                  <Text className="block text-sm font-medium text-slate-700">出生时辰（小时）</Text>
+                </View>
                 <Text className="block text-xs text-slate-400 mb-2">输入0-23的数字（24小时制）</Text>
-                <View className="bg-slate-50 rounded-xl px-4 py-3">
+                <View>
                   <Input 
                     type="number"
                     placeholder="请输入0-23，如14表示下午2点"
                     value={hour}
-                    onChange={(e) => setHour(e.detail.value)}
+                    onInput={(e) => setHour(e.detail.value)}
                   />
                 </View>
               </View>
@@ -246,7 +242,10 @@ export default function BaziTest() {
         </View>
 
         {/* 底部按钮 */}
-        <View className="fixed bottom-0 left-0 right-0 bg-white px-4 py-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+        <View
+          className="bg-white px-4 py-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
+          style={{ position: 'fixed', display: 'flex', left: 0, right: 0, bottom: 0, zIndex: 40 }}
+        >
           <Button 
             className={`w-full h-12 rounded-xl ${
               isComplete 

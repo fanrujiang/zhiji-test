@@ -57,7 +57,10 @@ const featureEntries = [
     borderColor: 'border-emerald-200',
     textColor: 'text-emerald-600',
     priority: 'medium',
-    action: () => Taro.showToast({ title: '八字命盘测算功能开发中', icon: 'none' })
+    action: () => {
+      Taro.setStorageSync('active_test_type', 'bazi')
+      Taro.navigateTo({ url: '/pages/test/bazi-index' })
+    }
   },
   {
     id: 'constellation',
@@ -176,7 +179,7 @@ export default function Index() {
                       开始测试
                     </Button>
                   </View>
-                  <View className="bg-white/20 rounded-full p-3">
+                  <View className="bg-white bg-opacity-20 rounded-full p-3">
                     <Brain size={32} color="#FFFFFF" />
                   </View>
                 </View>
@@ -210,7 +213,7 @@ export default function Index() {
                       开始测试
                     </Button>
                   </View>
-                  <View className="bg-white/20 rounded-full p-3">
+                  <View className="bg-white bg-opacity-20 rounded-full p-3">
                     <HeartHandshake size={32} color="#FFFFFF" />
                   </View>
                 </View>

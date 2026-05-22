@@ -200,23 +200,22 @@ export function calculateBazi(
   const monthBranchNum = (month - 1) % 12
   
   // 日柱：使用蔡勒公式计算
-  const y = year
-  const m = month
-  let d = day
-  if (m < 3) {
-    y = year - 1
-    d = month + 12
+  let zellerYear = year
+  let zellerMonth = month
+  if (zellerMonth < 3) {
+    zellerYear = year - 1
+    zellerMonth += 12
   }
-  const c = Math.floor(y / 100)
-  const y2 = y % 100
-  const dayOfWeek = (Math.floor(c / 4) - 2 * c + y2 + Math.floor(y2 / 4) + Math.floor(13 * (d + 1) / 5) + d - 1) % 10
+  const c = Math.floor(zellerYear / 100)
+  const y2 = zellerYear % 100
+  const dayOfWeek = (Math.floor(c / 4) - 2 * c + y2 + Math.floor(y2 / 4) + Math.floor(13 * (zellerMonth + 1) / 5) + day - 1) % 10
   const dayStemNum = (dayOfWeek + 10) % 10
   const dayBranchNum = (dayOfWeek + 6) % 12
   
   // 时柱天干：日干对应时干（甲己日子时...）
   const hourStemBase: Record<number, number> = { 0: 0, 1: 2, 2: 4, 3: 6, 4: 8, 5: 0, 6: 2, 7: 4, 8: 6, 9: 8 }
-  const hourStemNum = (hourStemBase[dayStemNum] + Math.floor(hour / 2)) % 10
-  const hourBranchNum = hour % 12
+  const hourBranchNum = Math.floor((hour + 1) / 2) % 12
+  const hourStemNum = (hourStemBase[dayStemNum] + hourBranchNum) % 10
   
   const stems = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸']
   const branches = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥']

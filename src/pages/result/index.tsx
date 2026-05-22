@@ -1,28 +1,47 @@
 import { useState, useEffect } from 'react'
 import Taro from '@tarojs/taro'
-import { View, Text, Button as MiniButton } from '@tarojs/components'
+import { View, Text } from '@tarojs/components'
 import { Network } from '@/network'
 import { Button as UiButton } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { NavBar } from '@/components/ui/navbar'
 import { Progress } from '@/components/ui/progress'
-import { Share2, RefreshCcw, Heart, Briefcase, Users, Sparkles, HeartHandshake, ShieldCheck } from 'lucide-react-taro'
+import { Share2, RefreshCcw, Heart, Briefcase, Users, Sparkles, HeartHandshake, ShieldCheck, CalendarDays, Compass, Clock } from 'lucide-react-taro'
 import { mbtiDescriptions, defaultResult, MBTIResult } from '../test/data'
 import { AttachmentResult } from '../test/attachment-data'
+import { BaziResult, calculateDaYun, DaYun, zodiacDescriptions } from '../test/bazi-data'
 
-type ResultType = 'mbti' | 'attachment'
+type ResultType = 'mbti' | 'attachment' | 'bazi'
 
 export default function Result() {
   const [resultType, setResultType] = useState<ResultType>('mbti')
   const [mbtiResult, setMbtiResult] = useState<MBTIResult | null>(null)
   const [attachmentResult, setAttachmentResult] = useState<AttachmentResult | null>(null)
+  const [baziResult, setBaziResult] = useState<BaziResult | null>(null)
+  const [daYunList, setDaYunList] = useState<DaYun[]>([])
+  const [baziGender, setBaziGender] = useState<'男' | '女'>('男')
   const [mbtiType, setMbtiType] = useState('')
-  const isWeapp = Taro.getEnv() === Taro.ENV_TYPE.WEAPP
 
   useEffect(() => {
     const routerType = Taro.getCurrentInstance().router?.params?.type
     const savedType = Taro.getStorageSync('active_test_type')
-    const nextType = routerType === 'attachment' || savedType === 'attachment' ? 'attachment' : 'mbti'
+    const nextType: ResultType = routerType === 'bazi' || savedType === 'bazi'
+      ? 'bazi'
+      : routerType === 'attachment' || savedType === 'attachment'
+        ? 'attachment'
+        : 'mbti'
     setResultType(nextType)
+
+    if (nextType === 'bazi') {
+      const savedResult = Taro.getStorageSync('bazi_result') as BaziResult | ''
+      const savedGender = (Taro.getStorageSync('bazi_gender') || '男') as '男' | '女'
+      if (savedResult) {
+        setBaziResult(savedResult)
+        setBaziGender(savedGender)
+        setDaYunList(calculateDaYun(savedResult, savedGender))
+      }
+      return
+    }
 
     if (nextType === 'attachment') {
       const savedResult = Taro.getStorageSync('attachment_result') as AttachmentResult | ''
@@ -66,14 +85,131 @@ export default function Result() {
           if (resultType === 'attachment') {
             Taro.removeStorageSync('attachment_answers')
             Taro.removeStorageSync('attachment_result')
+          } else if (resultType === 'bazi') {
+            Taro.removeStorageSync('bazi_result')
+            Taro.removeStorageSync('bazi_gender')
+            Taro.removeStorageSync('bazi_birth')
           } else {
             Taro.removeStorageSync('mbti_answers')
             Taro.removeStorageSync('mbti_result')
           }
-          Taro.redirectTo({ url: '/pages/index/index' })
+          Taro.switchTab({ url: '/pages/index/index' })
         }
       }
     })
+  }
+
+  if (resultType === 'bazi') {
+    if (!baziResult) {
+      return (
+        <View className="min-h-screen bg-slate-50 flex items-center justify-center">
+          <Text className="block text-slate-500">加载中...</Text>
+        </View>
+      )
+    }
+
+    const pillars = [
+      { label: '年柱', value: baziResult.year },
+      { label: '月柱', value: baziResult.month },
+      { label: '日柱', value: baziResult.day },
+      { label: '时柱', value: baziResult.hour }
+    ]
+    const zodiac = zodiacDescriptions[baziResult.zodiac]
+
+    return (
+      <View className="min-h-screen bg-gradient-to-b from-amber-50 via-white to-white pb-8">
+        <NavBar title="八字命盘结果" showBack />
+        <View className="px-4 pt-8 pb-6 text-center">
+          <View className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 mb-4">
+            <Compass size={32} color="#D97706" />
+          </View>
+          <Text className="block text-sm text-slate-500 mb-2">你的八字命盘</Text>
+          <Text className="block text-3xl font-bold text-amber-600 mb-2">
+            {pillars.map((pillar) => `${pillar.value.stem}${pillar.value.branch}`).join(' ')}
+          </Text>
+          <Text className="block text-base text-slate-600">
+            {baziGender}命 · 生肖{baziResult.zodiac} · 日主{baziResult.dayMaster}{baziResult.dayMasterElement}
+          </Text>
+        </View>
+
+        <View className="px-4 mb-4">
+          <View className="grid grid-cols-4 gap-2">
+            {pillars.map((pillar) => (
+              <Card key={pillar.label} className="border-amber-200">
+                <CardContent className="p-3 text-center">
+                  <Text className="block text-xs text-slate-500 mb-2">{pillar.label}</Text>
+                  <Text className="block text-xl font-bold text-slate-800">
+                    {pillar.value.stem}{pillar.value.branch}
+                  </Text>
+                  <Text className="block text-xs text-amber-600 mt-1">{pillar.value.naYin}</Text>
+                </CardContent>
+              </Card>
+            ))}
+          </View>
+        </View>
+
+        <View className="px-4 mb-4">
+          <Card className="shadow-md border-0">
+            <CardContent className="p-5">
+              <View className="flex items-center gap-2 mb-3">
+                <Sparkles size={18} color="#D97706" />
+                <Text className="block text-base font-semibold text-slate-800">日主解析</Text>
+              </View>
+              <Text className="block text-sm text-slate-600 leading-relaxed">
+                {baziResult.dayMasterDescription}
+              </Text>
+            </CardContent>
+          </Card>
+        </View>
+
+        {zodiac && (
+          <View className="px-4 mb-4">
+            <Card className="shadow-md border-0">
+              <CardContent className="p-5">
+                <View className="flex items-center gap-2 mb-3">
+                  <CalendarDays size={18} color="#10B981" />
+                  <Text className="block text-base font-semibold text-slate-800">生肖提示</Text>
+                </View>
+                <Text className="block text-sm text-slate-600 leading-relaxed mb-3">
+                  {zodiac.personality}
+                </Text>
+                <View className="flex flex-wrap gap-2">
+                  <View className="px-3 py-2 rounded-lg bg-emerald-50">
+                    <Text className="block text-sm text-emerald-700">幸运：{zodiac.lucky}</Text>
+                  </View>
+                  <View className="px-3 py-2 rounded-lg bg-blue-50">
+                    <Text className="block text-sm text-blue-700">相合：{zodiac.compatible}</Text>
+                  </View>
+                </View>
+              </CardContent>
+            </Card>
+          </View>
+        )}
+
+        <View className="px-4 mb-6">
+          <Card className="shadow-md border-0">
+            <CardContent className="p-5">
+              <View className="flex items-center gap-2 mb-3">
+                <Clock size={18} color="#8B5CF6" />
+                <Text className="block text-base font-semibold text-slate-800">大运简表</Text>
+              </View>
+              <View className="grid grid-cols-4 gap-2">
+                {daYunList.slice(0, 8).map((item) => (
+                  <View key={`${item.age}-${item.stem}${item.branch}`} className="rounded-lg bg-violet-50 py-2 text-center">
+                    <Text className="block text-xs text-violet-500">{item.age}岁</Text>
+                    <Text className="block text-sm font-semibold text-violet-700">
+                      {item.stem}{item.branch}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </CardContent>
+          </Card>
+        </View>
+
+        <ResultActions onRetest={handleRetest} shareTitle="分享命盘" retestTitle="重新测算" />
+      </View>
+    )
   }
 
   if (resultType === 'attachment') {
@@ -90,6 +226,7 @@ export default function Result() {
 
     return (
       <View className="min-h-screen bg-gradient-to-b from-pink-50 via-white to-white pb-8">
+        <NavBar title="依恋测试结果" showBack />
         <View className="px-4 pt-10 pb-8 text-center">
           <View className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-pink-100 mb-4">
             <HeartHandshake size={32} color="#EC4899" />
@@ -191,7 +328,7 @@ export default function Result() {
           </Card>
         </View>
 
-        <ResultActions isWeapp={isWeapp} onRetest={handleRetest} shareTitle="分享结果" retestTitle="重新测试" />
+        <ResultActions onRetest={handleRetest} shareTitle="分享结果" retestTitle="重新测试" />
       </View>
     )
   }
@@ -206,6 +343,7 @@ export default function Result() {
 
   return (
     <View className="min-h-screen bg-gradient-to-b from-indigo-50 via-white to-white pb-8">
+      <NavBar title="MBTI 测试结果" showBack />
       <View className="px-4 pt-10 pb-8 text-center">
         <Text className="block text-sm text-slate-500 mb-4">你的 MBTI 人格类型</Text>
 
@@ -302,7 +440,7 @@ export default function Result() {
         </View>
       )}
 
-      <ResultActions isWeapp={isWeapp} onRetest={handleRetest} shareTitle="分享结果" retestTitle="重新测试" />
+      <ResultActions onRetest={handleRetest} shareTitle="分享结果" retestTitle="重新测试" />
 
       <View className="px-4">
         <Card className="bg-gradient-to-r from-indigo-500 to-violet-500 border-0">
@@ -321,12 +459,10 @@ export default function Result() {
 }
 
 function ResultActions({
-  isWeapp,
   onRetest,
   shareTitle,
   retestTitle
 }: {
-  isWeapp: boolean
   onRetest: () => void
   shareTitle: string
   retestTitle: string
@@ -334,33 +470,21 @@ function ResultActions({
   return (
     <View className="px-4 pb-8">
       <View className="flex gap-3 mb-3">
-        {isWeapp ? (
-          <MiniButton
-            openType="share"
-            className="flex-1 h-12 rounded-xl bg-indigo-500"
-          >
-            <View className="flex h-full items-center justify-center gap-2 px-4">
-              <Share2 size={18} color="#FFFFFF" />
-              <Text className="block text-sm text-white font-medium">{shareTitle}</Text>
-            </View>
-          </MiniButton>
-        ) : (
-          <UiButton
-            className="flex-1 h-12 bg-indigo-500 hover:bg-indigo-600 rounded-xl"
-            onClick={() => {
-              Taro.showToast({
-                title: '请在微信小程序中使用分享功能',
-                icon: 'none',
-                duration: 1500
-              })
-            }}
-          >
-            <View className="flex items-center gap-2">
-              <Share2 size={18} color="#FFFFFF" />
-              <Text className="block text-sm text-white font-medium">{shareTitle}</Text>
-            </View>
-          </UiButton>
-        )}
+        <UiButton
+          className="flex-1 h-12 bg-indigo-500 hover:bg-indigo-600 rounded-xl"
+          onClick={() => {
+            Taro.showToast({
+              title: '请使用右上角菜单分享',
+              icon: 'none',
+              duration: 1500
+            })
+          }}
+        >
+          <View className="flex items-center gap-2">
+            <Share2 size={18} color="#FFFFFF" />
+            <Text className="block text-sm text-white font-medium">{shareTitle}</Text>
+          </View>
+        </UiButton>
         <UiButton
           variant="outline"
           className="flex-1 h-12 border-indigo-200 rounded-xl"
@@ -385,6 +509,16 @@ export function onShareAppMessage() {
       title: result
         ? `我的依恋类型是${result.title}，你也来测一测吧！`
         : '来测一测你的依恋类型吧！',
+      path: '/pages/index/index'
+    }
+  }
+
+  if (activeType === 'bazi') {
+    const result = Taro.getStorageSync('bazi_result') as BaziResult | ''
+    return {
+      title: result
+        ? `我的八字命盘是${result.year.stem}${result.year.branch} ${result.month.stem}${result.month.branch} ${result.day.stem}${result.day.branch} ${result.hour.stem}${result.hour.branch}，你也来测一测吧！`
+        : '来测一测你的八字命盘吧！',
       path: '/pages/index/index'
     }
   }
